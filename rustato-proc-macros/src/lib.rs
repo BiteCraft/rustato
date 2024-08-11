@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, Attribute, ItemStruct, LitStr};
+use syn::{parse_macro_input, ItemStruct, LitStr};
 
 #[proc_macro]
 pub fn create_state(input: TokenStream) -> TokenStream {
@@ -12,7 +12,7 @@ pub fn create_state(input: TokenStream) -> TokenStream {
         #[derive(Clone, Default)]
         #struct_def
 
-        rustato_core::GLOBAL_STATE_MANAGER.register_state::<#struct_name>(stringify!(#struct_name), #struct_name::default());
+        rustato::GLOBAL_STATE_MANAGER.register_state::<#struct_name>(stringify!(#struct_name), #struct_name::default());
     };
 
     TokenStream::from(expanded)
