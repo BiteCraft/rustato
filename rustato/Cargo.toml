@@ -10,7 +10,7 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
-rustato-core = { path = "../rustato-core" }
-rustato-macros = { path = "../rustato-macros" }
-rustato-proc-macros = { path = "../rustato-proc-macros" }
+rustato-core = { path = "../rustato-core", version = "0.1.0" }
+rustato-macros = { path = "../rustato-macros", version = "0.1.0" }
+rustato-proc-macros = { path = "../rustato-proc-macros", version = "0.1.0" }
 once_cell = "1.7"
