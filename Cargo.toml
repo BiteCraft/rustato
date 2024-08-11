@@ -1,0 +1,17 @@
+[workspace]
+members = [
+    "rustato",
+    "rustato-core",
+    "rustato-macros",
+    "rustato-proc-macros",
+]
+default-members = ["rustato"]
+resolver = "2"
+
+[workspace.package]
+authors = ["Vinicius Borges <viniciusborgeis@gmail.com>"]
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/BiteCraft/rustato"
+keywords = ["state-management", "rust", "global-state", "reactive", "application-state"]
+categories = ["development-tools"]

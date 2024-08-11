@@ -1,0 +1,38 @@
+name: Publish Crate
+
+on:
+  push:
+    paths:
+      - 'rustato*/Cargo.toml'
+  workflow_dispatch:
+
+jobs:
+  publish-crate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        crate: [rustato-core, rustato-macros, rustato-proc-macros, rustato]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Check version change
+        id: check_version
+        run: |
+          cd ${{ matrix.crate }}
+          CURRENT_VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)
+          PUBLISHED_VERSION=$(cargo search ${{ matrix.crate }} --limit 1 | sed -n 's/^[^"]*"\([^"]*\)".*/\1/p')
+          if [ "$CURRENT_VERSION" != "$PUBLISHED_VERSION" ]; then
+            echo "::set-output name=version_changed::true"
+          fi
+
+      - name: Publish crate
+        if: steps.check_version.outputs.version_changed == 'true'
+        run: |
+          cd ${{ matrix.crate }}
+          cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}

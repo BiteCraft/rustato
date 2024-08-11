@@ -1,0 +1,33 @@
+name: Publish All Crates
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish-crates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Publish crates
+        env:
+          CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+        run: |
+          for crate in rustato-core rustato-macros rustato-proc-macros rustato; do
+            cd $crate
+            CURRENT_VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)
+            PUBLISHED_VERSION=$(cargo search $crate --limit 1 | sed -n 's/^[^"]*"\([^"]*\)".*/\1/p')
+            if [ "$CURRENT_VERSION" != "$PUBLISHED_VERSION" ]; then
+              echo "Publishing $crate version $CURRENT_VERSION"
+              cargo publish --token $CRATES_IO_TOKEN
+            else
+              echo "Skipping $crate, version unchanged"
+            fi
+            cd ..
+          done

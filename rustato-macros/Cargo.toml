@@ -1,0 +1,13 @@
+[package]
+name = "rustato-macros"
+version = "0.1.0"
+edition.workspace = true
+authors.workspace = true
+description = "Macros for the Rustato library"
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+rustato-core = { path = "../rustato-core" }

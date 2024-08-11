@@ -1,0 +1,54 @@
+# Arquivos gerados pelo Rust
+/target/
+**/*.rs.bk
+
+# Arquivos de configuração do Cargo
+Cargo.lock
+
+# Arquivos de configuração do IDE
+.idea/
+.vscode/
+
+# Arquivos de compilação
+*.o
+*.a
+*.so
+*.dylib
+
+# Arquivos de log
+*.log
+
+# Arquivos temporários
+*.tmp
+*.swp
+*~
+
+# Arquivos específicos do sistema operacional
+.DS_Store
+Thumbs.db
+
+# Diretórios de dependências
+/vendor/
+
+# Arquivos de ambiente
+.env
+
+# Arquivos de documentação gerados
+/doc/
+
+# Arquivos de teste de cobertura
+/coverage/
+
+# Arquivos de saída de benchmark
+/benches/target/
+
+# Ignorar todos os arquivos em diretórios target de subcrates
+/**/target/
+
+# Ignorar arquivos de configuração local do Cargo
+.cargo/config.toml
+
+# Ignorar arquivos de perfil
+*.profraw
+
+.cursorignore
