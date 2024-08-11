@@ -1,6 +1,6 @@
 [package]
 name = "rustato"
-version = "0.1.0"
+version = "0.1.1"
 edition.workspace = true
 authors.workspace = true
 description = "A global state management library for Rust applications"
@@ -11,6 +11,6 @@ categories.workspace = true
 
 [dependencies]
 rustato-core = { path = "../rustato-core", version = "0.1.0" }
-rustato-macros = { path = "../rustato-macros", version = "0.1.0" }
-rustato-proc-macros = { path = "../rustato-proc-macros", version = "0.1.0" }
+rustato-macros = { path = "../rustato-macros", version = "0.1.1" }
+rustato-proc-macros = { path = "../rustato-proc-macros", version = "0.1.1" }
 once_cell = "1.7"
