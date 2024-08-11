@@ -9,9 +9,10 @@
 <h4 align="center">A generical thread-safe global state manager for Rust</h4>
 
 <p align="center">
-	<img src="https://badge.fury.io/rb/coinbase_commerce_client.svg" alt="Coverage">
-	<img src="https://raw.githubusercontent.com/viniciusborgeis/coinbase_commerce_client/main/badge.svg" alt="Coverage">
-    <img src="https://img.shields.io/gem/dt/coinbase_commerce_client.svg?type=total"  alt="Total Downloads">
+	<img alt="Crates.io Version" src="https://img.shields.io/crates/v/rustato">
+    <img src="https://img.shields.io/crates/d/rustato"  alt="Total Downloads">
+    <img src="https://img.shields.io/crates/size/rustato" alt="size">
+    <img src="https://img.shields.io/github/license/BiteCraft/rustato" alt="License">
 </p>
 
 <p align="center">
