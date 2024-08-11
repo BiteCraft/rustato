@@ -16,4 +16,4 @@ proc-macro = true
 syn = { version = "2.0", features = ["full"] }
 quote = "1.0"
 proc-macro2 = "1.0"
-rustato-core = { path = "../rustato-core" }
+rustato-core = { path = "../rustato-core", version = "0.1.0" }
