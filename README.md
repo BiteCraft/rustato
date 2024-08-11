@@ -65,7 +65,7 @@ To use the Rustato Library in your project, add the following to your `Cargo.tom
 
 ```toml
 [dependencies]
-rustato = "0.1.0"
+rustato = "0.1.1"
 ```
 
 Then, add the following to your main Rust file:
