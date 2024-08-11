@@ -10,4 +10,4 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
-rustato-core = { path = "../rustato-core" }
+rustato-core = { path = "../rustato-core", version = "0.1.0" }
