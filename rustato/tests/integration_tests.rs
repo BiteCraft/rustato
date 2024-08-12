@@ -1,137 +1,80 @@
 use rustato::*;
-use std::thread;
+use std::sync::{Arc, Mutex};
 
 #[test]
-fn test_create_and_use_state() {
-    create_state!(struct AppState {
-        status: String,
-        window_visible: bool,
-        user_count: u32,
+fn test_create_signal() {
+    let age = create_signal!(42);
+    assert_eq!(age.get(), 42);
+
+    age.set(43);
+    assert_eq!(age.get(), 43);
+
+    let changed = Arc::new(Mutex::new(false));
+    let changed_clone = Arc::clone(&changed);
+
+    age.on_change(move |old_value, new_value| {
+        assert_eq!(*old_value, 43);
+        assert_eq!(*new_value, 44);
+        *changed_clone.lock().unwrap() = true;
     });
 
-    {
-        let mut app_state = get_state!(AppState).write();
-        app_state.status = "Running".to_string();
-        app_state.window_visible = true;
-        app_state.user_count = 42;
-    }
+    age.set(44);
+    assert!(*changed.lock().unwrap());
+}
 
-    {
-        let app_state = get_state!(AppState).read();
-        assert_eq!(app_state.status, "Running".to_string());
-        assert_eq!(app_state.window_visible, true);
-        assert_eq!(app_state.user_count, 42);
+
+#[AutoState]
+#[derive(Default)]
+pub struct CounterState {
+    pub count: Signal<i32>,
+}
+
+impl CounterState {
+    pub fn increment(&self) {
+        self.count.set(self.count.get() + 1);
     }
 }
 
 #[test]
-fn test_multithreaded_state() {
-    create_state!(struct SharedState {
-        value: i32,
+fn test_create_global_state() {
+    // Verificar se o estado global foi criado corretamente
+    assert!(get_state!(CounterState).read().count.get() == 0, "Initial state should be 0");
+
+    let changed = Arc::new(Mutex::new(false));
+    let changed_clone = Arc::clone(&changed);
+    let callback_count = Arc::new(Mutex::new(0));
+    let callback_count_clone = Arc::clone(&callback_count);
+
+    on_state_change!(CounterState, move |field, state| {
+        assert_eq!(field, "count", "Changed field should be 'count'");
+        *changed_clone.lock().unwrap() = true;
+        *callback_count_clone.lock().unwrap() += 1;
     });
 
-    let handles: Vec<_> = (0..10).map(|i| {
-        thread::spawn(move || {
-            let mut state = get_state!(SharedState).write();
-            state.value += i;
-        })
-    }).collect();
-
-    for handle in handles {
-        handle.join().unwrap();
-    }
-
-    let final_state = get_state!(SharedState).read();
-    assert_eq!(final_state.value, 45); // 0 + 1 + 2 + ... + 9 = 45
-}
-
-#[test]
-fn test_custom_state_types() {
-    #[derive(Clone, Default)]
-    struct User {
-        id: u64,
-        name: String,
-        email: String,
-    }
-
-    create_state!(struct UserState {
-        current_user: User,
-        logged_in: bool,
-    });
-
+    // Primeiro incremento
     {
-        let mut state = get_state!(UserState).write();
-        state.current_user = User {
-            id: 1,
-            name: "John Doe".to_string(),
-            email: "john@example.com".to_string(),
-        };
-        state.logged_in = true;
+        let counter_state = get_state!(CounterState);
+        let mut write_guard = counter_state.write();
+        write_guard.increment();
+        write_guard.register_change("count");
     }
 
+    assert_eq!(get_state!(CounterState).read().count.get(), 1, "Count should be 1 after first increment");
+    assert!(*changed.lock().unwrap(), "Changed flag should be true after first increment");
+    assert_eq!(*callback_count.lock().unwrap(), 1, "Callback should have been called once");
+
+    // Resetar o flag de mudança
+    *changed.lock().unwrap() = false;
+
+    // Segundo incremento
     {
-        let user_state = get_state!(UserState).read();
-        assert_eq!(user_state.current_user.id, 1);
-        assert_eq!(user_state.current_user.name, "John Doe");
-        assert_eq!(user_state.current_user.email, "john@example.com");
-        assert!(user_state.logged_in);
-    }
-}
-
-#[test]
-fn test_state_change_callback() {
-    use std::sync::{Arc, Mutex};
-
-    create_state!(struct CounterState {
-        counter: i32,
-    });
-
-    let callback_called = Arc::new(Mutex::new(false));
-    let callback_called_clone = Arc::clone(&callback_called);
-
-    on_state_change!(CounterState, move |field_changed: &str, state: &CounterState| {
-        println!("Callback called with field: {}, counter: {}", field_changed, state.counter);
-        if field_changed == "all" {
-            assert_eq!(state.counter, 1);
-            *callback_called_clone.lock().unwrap() = true;
-        }
-    });
-
-    {
-        let mut state = get_state!(CounterState).write();
-        state.counter = 1;
+        let counter_state = get_state!(CounterState);
+        let mut write_guard = counter_state.write();
+        write_guard.increment();
+        write_guard.register_change("count");
     }
 
-    // Add a small delay to ensure the callback has time to execute
-    std::thread::sleep(std::time::Duration::from_millis(100));
-
-    assert!(*callback_called.lock().unwrap(), "Callback was not called");
-}
-
-#[test]
-fn test_multiple_states() {
-    create_state!(struct StateA {
-        value_a: i32,
-    });
-
-    create_state!(struct StateB {
-        value_b: String,
-    });
-
-    {
-        let mut state_a = get_state!(StateA).write();
-        state_a.value_a = 42;
-    }
-
-    {
-        let mut state_b = get_state!(StateB).write();
-        state_b.value_b = "Hello, World!".to_string();
-    }
-
-    {
-        let state_a = get_state!(StateA).read();
-        let state_b = get_state!(StateB).read();
-        assert_eq!(state_a.value_a, 42);
-        assert_eq!(state_b.value_b, "Hello, World!");
-    }
+    assert_eq!(get_state!(CounterState).read().count.get(), 2, "Count should be 2 after second increment");
+    assert!(*changed.lock().unwrap(), "Changed flag should be true after second increment");
+    assert_eq!(*callback_count.lock().unwrap(), 2, "Callback should have been called twice");
 }
