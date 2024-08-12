@@ -1,22 +1,41 @@
+pub use rustato_core::*;
+
+#[macro_export]
+macro_rules! create_signal {
+    ($initial:expr) => {{
+        $crate::__rustato_core_helper(|| $crate::Signal::new($initial, String::from("unnamed")))
+    }};
+    ($initial:expr, $field_name:expr) => {{
+        $crate::__rustato_core_helper(|| $crate::Signal::new($initial, String::from($field_name)))
+    }};
+}
+
+#[macro_export]
+macro_rules! GlobalState {
+    ($name:ident) => {
+        $crate::__rustato_core_helper(|| {
+            $crate::__register_global_state_immediately(
+                stringify!($name),
+                || $crate::GlobalState::new(<$name>::default())
+            )
+        })
+    };
+}
+
 #[macro_export]
 macro_rules! get_state {
-    ($type:ty) => {{
-        use rustato::{once_cell, State, GLOBAL_STATE_MANAGER};
-
-        static STATE: once_cell::sync::Lazy<State<$type>> = once_cell::sync::Lazy::new(|| {
-            rustato::GLOBAL_STATE_MANAGER
-                .get_state::<$type>(stringify!($type))
-                .unwrap_or_else(|| panic!("Estado '{}' não encontrado. Certifique-se de que create_state!() foi chamado para este tipo.", stringify!($type)))
-        });
-        &*STATE
+    ($name:ident) => {{
+        $crate::__rustato_core_helper(|| $crate::get_global_state::<$name>(stringify!($name)).unwrap())
     }};
 }
 
 #[macro_export]
 macro_rules! on_state_change {
-    ($type:ty, $callback:expr) => {{
-        use rustato::{GLOBAL_STATE_MANAGER, StateChangeCallback};
-        let callback: StateChangeCallback<$type> = Box::new($callback);
-        rustato::GLOBAL_STATE_MANAGER.register_callback::<$type>(stringify!($type), callback);
+    ($state:ident, $callback:expr) => {{
+        $crate::__rustato_core_helper(|| {
+            let state = $crate::get_global_state::<$state>(stringify!($state))
+                .expect("State not found");
+            state.on_change($callback);
+        })
     }};
 }
